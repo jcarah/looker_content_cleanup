@@ -1,0 +1,5 @@
+*.csv
+*.ini
+*.pyc
+.mypy_cache
+unused_content_identification.py
