@@ -6,7 +6,7 @@ import sys
 import csv
 from pprint import pprint
 
-config_file = "sandbox.ini"
+config_file = "looker.ini"
 sdk = client.setup(config_file)
 
 def get_base_url():
@@ -108,7 +108,7 @@ def main():
                 )
                 user_id = dashboard.user_id
                 folder = dashboard.folder
-            except:
+            except (StopIteration, AttributeError):
                 pass
 
         elif item["content_usage.content_type"] == "look":
@@ -118,7 +118,7 @@ def main():
                 )
                 user_id = look.user_id
                 folder = look.folder
-            except:
+            except (StopIteration, AttributeError):
                 pass
         row["user_id"] = str(user_id)
         row["folder_id"] = folder.id
@@ -131,25 +131,22 @@ def main():
             row["first_name"] = user.first_name
             row["last_name"] = user.last_name
             row["email"] = user.email
-        except Exception as e:
-            print(e)
+        except (StopIteration, KeyError):
             pass
-        output_data.append(row)
-
-    for item in output_data:
-        if item["content_type"] == "dashboard":
-            id = item["dashboard_id"]
+        if row["content_type"] == "dashboard":
+            id = row["dashboard_id"]
         else:
-            id = item["look_id"]
-        content_type = item["content_type"]
+            id = row["look_id"]
+        content_type = row["content_type"]
 
-        item["url"] =  f"{base_url}/{content_type}s/{id}"
+        row["url"] =  f"{base_url}/{content_type}s/{id}"
         try:
             parent_folder = join_content(
-                folders, "id", item, "parent_folder_id"
+                folders, "id", row, "parent_folder_id"
             )
-            item["parent_folder_name"] = parent_folder.name
-        except:
+            row["parent_folder_name"] = parent_folder.name
+        except (StopIteration, KeyError):
             pass
+        output_data.append(row)
     write_content_to_csv(output_data, "unused_content.csv")
 main()

@@ -5,14 +5,14 @@ import csv
 import json
 from pprint import pprint
 
-config_file = 'sandbox.ini'
+config_file = "looker.ini"
 sdk = client.setup(config_file)
 
 def main():
     base_url = get_base_url()
     space_data = get_space_data()
     content_usage = get_content_usage()
-    print('Checking for broken content in production.')
+    print("Checking for broken content in production.")
     broken_content = parse_broken_content(
         base_url,
         get_broken_content(),
@@ -26,13 +26,13 @@ def get_base_url():
     """ Pull base url from looker.ini, remove port"""
     config = configparser.ConfigParser()
     config.read(config_file)
-    full_base_url = config.get('Looker', 'base_url')
+    full_base_url = config.get("Looker", "base_url")
     base_url = sdk.auth.settings.base_url[:full_base_url.index(":19999")]
     return base_url
 
 def get_space_data():
     """Collect all spaces"""
-    space_data = sdk.all_spaces(fields='id, parent_id, name')
+    space_data = sdk.all_spaces(fields="id, parent_id, name")
     return space_data
 
 def get_content_usage():
@@ -71,18 +71,18 @@ def parse_broken_content(base_url, broken_content, space_data, content_usage):
     output = []
     for item in broken_content:
         if item.dashboard:
-            content_type = 'dashboard'
+            content_type = "dashboard"
         else:
-            content_type = 'look'
+            content_type = "look"
         item_content_type = getattr(item, content_type)
         id = item_content_type.id
         name = item_content_type.title
         space_id = item_content_type.space.id
         space_name = item_content_type.space.name
         errors = item.errors
-        url =  f'{base_url}/{content_type}s/{id}'
-        space_url = '{}/spaces/{}'.format(base_url,space_id)
-        if content_type == 'look':
+        url =  f"{base_url}/{content_type}s/{id}"
+        space_url = "{}/spaces/{}".format(base_url,space_id)
+        if content_type == "look":
                 element = None
         else:
             dashboard_element = item.dashboard_element
@@ -91,11 +91,11 @@ def parse_broken_content(base_url, broken_content, space_data, content_usage):
         space = join_content_sdk(space_data, "id", space_id)
         parent_space_id = space.parent_id
         # Old version of API  has issue with None type for all_space() call
-        if  parent_space_id is None or parent_space_id == 'None':
+        if  parent_space_id is None or parent_space_id == "None":
             parent_space_url = None
             parent_space_name = None
         else:
-            parent_space_url = '{}/spaces/{}'.format(
+            parent_space_url = "{}/spaces/{}".format(
                 base_url,
                 parent_space_id
             )
@@ -106,34 +106,32 @@ def parse_broken_content(base_url, broken_content, space_data, content_usage):
                 parent_space_name = parent_space.name
             except AttributeError:
                 parent_space_name = None
-        if content_type == 'dashboard':
+        if content_type == "dashboard":
             try:
                 usage = join_content_dict(content_usage, "dashboard.id", id)
-                last_accessed_date = usage['content_usage.last_accessed_date']
-            except Exception as e:
-                print(e)
+                last_accessed_date = usage["content_usage.last_accessed_date"]
+            except (StopIteration, KeyError):
                 pass
-        elif content_type == 'look':
+        elif content_type == "look":
             try:
                 usage = join_content_dict(content_usage, "look.id", id)
-                last_accessed_date = usage['content_usage.last_accessed_date']
-            except Exception as e:
-                print(e)
+                last_accessed_date = usage["content_usage.last_accessed_date"]
+            except (StopIteration, KeyError):
                 pass
         else:
             last_accessed_date is None
         data = {
-                'id' : id,
-                'content_type' : content_type,
-                'name' : name,
-                'url' : url,
-                'dashboard_element': element,
-                'space_name' : space_name,
-                'space_url' : space_url,
-                'parent_space_name': parent_space_name,
-                'parent_space_url': parent_space_url,
-                'errors': str(errors),
-                'last_accessed_date': last_accessed_date
+                "id" : id,
+                "content_type" : content_type,
+                "name" : name,
+                "url" : url,
+                "dashboard_element": element,
+                "space_name" : space_name,
+                "space_url" : space_url,
+                "parent_space_name": parent_space_name,
+                "parent_space_url": parent_space_url,
+                "errors": str(errors),
+                "last_accessed_date": last_accessed_date
                }
         output.append(data)
     return output
@@ -157,7 +155,7 @@ def join_content_sdk(match_list, left_key, right_key):
 def write_broken_content_to_file(broken_content, output_csv_name):
     """Export content errors in dev branch to csv file"""
     try:
-        with open(output_csv_name, 'w') as csvfile:
+        with open(output_csv_name, "w") as csvfile:
             writer = csv.DictWriter(
                 csvfile,
                fieldnames=list(broken_content[0].keys())
@@ -165,10 +163,10 @@ def write_broken_content_to_file(broken_content, output_csv_name):
             writer.writeheader()
             for data in broken_content:
                 writer.writerow(data)
-        print('Broken content information outputed to {}'.format(
+        print("Broken content information outputed to {}".format(
             output_csv_name
         ))
     except IOError:
-        print('I/O error')
+        print("I/O error")
 
 main()
