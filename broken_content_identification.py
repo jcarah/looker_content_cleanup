@@ -110,16 +110,16 @@ def parse_broken_content(base_url, broken_content, space_data, content_usage):
             try:
                 usage = join_content_dict(content_usage, "dashboard.id", id)
                 last_accessed_date = usage["content_usage.last_accessed_date"]
-            except (StopIteration, KeyError):
-                last_accessed_date is None
+            except (StopIteration):
+                last_accessed_date = None
         elif content_type == "look":
             try:
                 usage = join_content_dict(content_usage, "look.id", id)
                 last_accessed_date = usage["content_usage.last_accessed_date"]
-            except (StopIteration, KeyError):
-                last_accessed_date is None
+            except(StopIteration):
+                last_accessed_date = None
         else:
-            last_accessed_date is None
+            last_accessed_date = None
         data = {
                 "id" : id,
                 "content_type" : content_type,
