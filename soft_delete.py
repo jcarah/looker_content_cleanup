@@ -17,7 +17,7 @@ def soft_delete_look(look_id):
     look = models.WriteLookWithQuery(deleted=True)
     try:
         sdk.update_look(look_id, body=look)
-        print(f"Successfully soft deleted dashboard {look_id}")
+        print(f"Successfully soft deleted look {look_id}")
     except Exception as e:
         print(f"Error: {e}")
 

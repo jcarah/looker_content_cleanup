@@ -88,8 +88,11 @@ def parse_broken_content(base_url, broken_content, space_data, content_usage):
             dashboard_element = item.dashboard_element
             element = dashboard_element.title if dashboard_element else None
         # Lookup additional space information
-        space = join_content_sdk(space_data, "id", space_id)
-        parent_space_id = space.parent_id
+        try:
+            space = join_content_sdk(space_data, "id", space_id)
+            parent_space_id = space.parent_id
+        except (StopIteration):
+            parent_space_name = None
         # Old version of API  has issue with None type for all_space() call
         if  parent_space_id is None or parent_space_id == "None":
             parent_space_url = None
@@ -99,12 +102,12 @@ def parse_broken_content(base_url, broken_content, space_data, content_usage):
                 base_url,
                 parent_space_id
             )
-            parent_space = join_content_sdk(space_data, "id", parent_space_id)
             # Handling an edge case where space has no name. This can happen
             # when users are improperly generated with the API
             try:
+                parent_space = join_content_sdk(space_data, "id", parent_space_id)
                 parent_space_name = parent_space.name
-            except AttributeError:
+            except (StopIteration):
                 parent_space_name = None
         if content_type == "dashboard":
             try:
