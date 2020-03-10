@@ -85,10 +85,18 @@ def main():
     folder_keys = ["id", "parent_id", "name"]
 
     unused_content = get_unused_content(days)
-    dashboards = sdk.all_dashboards(fields=", ".join(dashboard_keys))
-    looks = sdk.all_looks(fields=", ".join(look_keys))
-    users = sdk.all_users(fields=", ".join(user_keys))
-    folders = sdk.all_folders(fields=", ".join(folder_keys))
+    dashboards = sdk.all_dashboards(
+        fields=", ".join(dashboard_keys),
+        transport_options=transport.TransportSettings(timeout=600))
+    looks = sdk.all_looks(
+        fields=", ".join(look_keys),
+        transport_options=transport.TransportSettings(timeout=600))
+    users = sdk.all_users(
+        fields=", ".join(user_keys),
+        transport_options=transport.TransportSettings(timeout=600))
+    folders = sdk.all_folders(
+        fields=", ".join(folder_keys),
+        transport_options=transport.TransportSettings(timeout=600))
     base_url = get_base_url()
 
     output_data = []
