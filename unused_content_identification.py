@@ -6,7 +6,7 @@ import sys
 import csv
 from pprint import pprint
 
-config_file = "looker.ini"
+config_file = "hubspot_prod.ini"
 sdk = client.setup(config_file)
 
 def get_base_url():
@@ -116,8 +116,15 @@ def main():
                 )
                 user_id = dashboard.user_id
                 folder = dashboard.folder
+                filder_id = folder.id
+                folder_name = folder.name
+                parent_folder_id = folder.parent_folder_id
             except (StopIteration, AttributeError):
-                pass
+                user_id = None
+                folder = None
+                filder_id = None
+                folder_name = None
+                parent_folder_id = None
 
         elif item["content_usage.content_type"] == "look":
             try:
@@ -127,11 +134,15 @@ def main():
                 user_id = look.user_id
                 folder = look.folder
             except (StopIteration, AttributeError):
-                pass
+                user_id = None
+                folder = None
+                folder_id = None
+                folder_name = None
+                parent_folder_id = None
         row["user_id"] = str(user_id)
-        row["folder_id"] = folder.id
-        row["folder_name"] = folder.name
-        row["parent_folder_id"] = folder.parent_id
+        row["folder_id"] = folder_id
+        row["folder_name"] = folder_name
+        row["parent_folder_id"] = parent_folder_id
         try:
             user= next(
                 i for i in users if str(getattr(i,"id")) == str(user_id)
@@ -140,7 +151,10 @@ def main():
             row["last_name"] = user.last_name
             row["email"] = user.email
         except (StopIteration, KeyError):
-            pass
+            row["first_name"] = None
+            row["last_name"] = None
+            row["email"] = None
+
         if row["content_type"] == "dashboard":
             id = row["dashboard_id"]
         else:
@@ -154,7 +168,7 @@ def main():
             )
             row["parent_folder_name"] = parent_folder.name
         except (StopIteration, KeyError):
-            pass
+            row["parent_folder_name"] = None
         output_data.append(row)
     write_content_to_csv(output_data, "unused_content.csv")
 main()
