@@ -6,7 +6,7 @@ import sys
 import csv
 from pprint import pprint
 
-config_file = "hubspot_prod.ini"
+config_file = "looker.ini"
 sdk = client.setup(config_file)
 
 def get_base_url():
@@ -121,7 +121,7 @@ def main():
                 folder_id = folder.id
                 folder_name = folder.name
                 parent_folder_id = folder.parent_id
-            except (StopIteration, AttributeError) as e:        
+            except (StopIteration, AttributeError) as e:
                 user_id = None
                 folder = None
                 folder_id = None
