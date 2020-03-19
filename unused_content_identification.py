@@ -6,7 +6,7 @@ import sys
 import csv
 from pprint import pprint
 
-config_file = "looker.ini"
+config_file = "hubspot_prod.ini"
 sdk = client.setup(config_file)
 
 def get_base_url():
@@ -49,7 +49,9 @@ def get_unused_content(days):
         fill_fields=None,
         filters={
             "content_usage.days_since_last_accessed": f">{days}",
-            "content_usage.content_type": "dashboard,look"
+            "content_usage.content_type": "dashboard,look",
+            "dashboard.deleted_date": "NULL",
+            "look.deleted_date": "NULL"
         },
         filter_expression="NOT(is_null(${dashboard.id}) AND is_null(${look.id}))",
         sorts=["content_usage.other_total"],
@@ -116,13 +118,13 @@ def main():
                 )
                 user_id = dashboard.user_id
                 folder = dashboard.folder
-                filder_id = folder.id
+                folder_id = folder.id
                 folder_name = folder.name
-                parent_folder_id = folder.parent_folder_id
-            except (StopIteration, AttributeError):
+                parent_folder_id = folder.parent_id
+            except (StopIteration, AttributeError) as e:        
                 user_id = None
                 folder = None
-                filder_id = None
+                folder_id = None
                 folder_name = None
                 parent_folder_id = None
 
@@ -132,8 +134,12 @@ def main():
                     looks, "id", item, "look.id"
                 )
                 user_id = look.user_id
+
                 folder = look.folder
-            except (StopIteration, AttributeError):
+                folder_id = folder.id
+                folder_name = folder.name
+                parent_folder_id = folder.parent_id
+            except (StopIteration, AttributeError) as e:
                 user_id = None
                 folder = None
                 folder_id = None
@@ -150,7 +156,7 @@ def main():
             row["first_name"] = user.first_name
             row["last_name"] = user.last_name
             row["email"] = user.email
-        except (StopIteration, KeyError):
+        except (StopIteration, KeyError) as e:
             row["first_name"] = None
             row["last_name"] = None
             row["email"] = None
