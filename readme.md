@@ -1,3 +1,7 @@
+# Warning
+
+The last_accessed_date for Looks can be misleading. It refers to the last time they were accessed directly, not when they were last accessed on a dashboard. Please avoid deleting Looks. A future iteration of these scripts will exclude Look-linked dashboard tiles. 
+
 # Looker Content Cleanup
 
 A collection of scripts to help identify unused and broken content in Looker. In a future iteration, we'll include methods for removing such content.
