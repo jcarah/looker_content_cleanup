@@ -1,24 +1,27 @@
-from looker_sdk import client, models
-from looker_sdk.rtl import transport
+import looker_sdk
+from looker_sdk import models
 import configparser
 import csv
 import json
 from pprint import pprint
 
 config_file = "looker.ini"
-sdk = client.setup(config_file)
+sdk = looker_sdk.init31(config_file)
 
 def main():
     base_url = get_base_url()
     space_data = get_space_data()
     content_usage = get_content_usage()
     print("Checking for broken content in production.")
+    content_validator_output = get_broken_content()
+    print("Parsing broken content")
     broken_content = parse_broken_content(
         base_url,
-        get_broken_content(),
+        content_validator_output,
         space_data,
         content_usage
     )
+    print(broken_content)
     print("Done checking for broken content")
     write_broken_content_to_file(broken_content, "broken_content.csv")
 
@@ -62,8 +65,7 @@ def get_content_usage():
 def get_broken_content():
     """Collect broken content"""
     broken_content  = sdk.content_validation(
-        transport_options=transport.TransportSettings(timeout=600)
-    ).content_with_errors
+        ).content_with_errors   
     return broken_content
 
 def parse_broken_content(base_url, broken_content, space_data, content_usage):
@@ -113,13 +115,13 @@ def parse_broken_content(base_url, broken_content, space_data, content_usage):
             try:
                 usage = join_content_dict(content_usage, "dashboard.id", id)
                 last_accessed_date = usage["content_usage.last_accessed_date"]
-            except (StopIteration):
+            except:
                 last_accessed_date = None
         elif content_type == "look":
             try:
                 usage = join_content_dict(content_usage, "look.id", id)
                 last_accessed_date = usage["content_usage.last_accessed_date"]
-            except(StopIteration):
+            except:
                 last_accessed_date = None
         else:
             last_accessed_date = None
