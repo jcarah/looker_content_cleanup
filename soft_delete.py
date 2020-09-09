@@ -1,8 +1,8 @@
 from looker_sdk import client, models
 from looker_sdk.rtl import transport
 
-config_file = 'looker.ini'
-sdk = client.setup(config_file)
+config_file = "looker.ini"
+sdk = looker_sdk.init31("looker.ini")
 
 
 def soft_delete_dashboard(dashboard_id):

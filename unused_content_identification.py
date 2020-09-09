@@ -1,13 +1,13 @@
-from looker_sdk import client, models
-from looker_sdk.rtl import transport
+import looker_sdk
+from looker_sdk import models
 import configparser
 import json
 import sys
 import csv
 from pprint import pprint
 
-config_file = "looker.ini"
-sdk = client.setup(config_file)
+config_file = "sandbox.ini"
+sdk = looker_sdk.init31(config_file)
 
 def get_base_url():
     """ Pull base url from looker.ini, remove port """
@@ -85,33 +85,57 @@ def main():
     look_keys = ["id", "title", "user_id", "folder"]
     user_keys = ["id", "first_name", "last_name", "email"]
     folder_keys = ["id", "parent_id", "name"]
-
+    
     unused_content = get_unused_content(days)
+    print(unused_content)
     dashboards = sdk.all_dashboards(
-        fields=", ".join(dashboard_keys),
-        transport_options=transport.TransportSettings(timeout=600))
+        fields=", ".join(dashboard_keys))
     looks = sdk.all_looks(
-        fields=", ".join(look_keys),
-        transport_options=transport.TransportSettings(timeout=600))
+        fields=", ".join(look_keys))
     users = sdk.all_users(
-        fields=", ".join(user_keys),
-        transport_options=transport.TransportSettings(timeout=600))
+        fields=", ".join(user_keys))
     folders = sdk.all_folders(
-        fields=", ".join(folder_keys),
-        transport_options=transport.TransportSettings(timeout=600))
+        fields=", ".join(folder_keys))
     base_url = get_base_url()
 
     output_data = []
+    print(unused_content)
     for item in unused_content:
         row = {}
-        row["dashboard_id"] = item["dashboard.id"]
-        row["look_id"] = item["look.id"]
-        row["dashboard_created_date"] = item["dashboard.created_date"]
-        row["look_created_date"] = item["look.created_date"]
-        row["content_title"] = item["content_usage.content_title"]
-        row["content_type"] = item["content_usage.content_type"]
-        row["last_accessed_date"] = item["content_usage.last_accessed_date"]
-        if item["content_usage.content_type"] == "dashboard":
+        try:
+            row["dashboard_id"] = item["dashboard.id"]
+        except(KeyError):
+            row["dashboard_id"] = None
+        try:
+            row["look_id"] = item["look.id"]
+        except(KeyError):
+            row['look_id'] = None
+        try:
+            row["dashboard_created_date"] = item["dashboard.created_date"]
+        except(KeyError):
+            row["dashboard_created_date"] = None
+        try:
+            row["look_created_date"] = item["look.created_date"]
+        except(KeyError):
+            row["look_created_date"] = None
+        try:
+            row["content_title"] = item["content_usage.content_title"]
+        except(KeyError):
+           row["content_title"] = None
+        try:
+            row["content_type"] = item["content_usage.content_type"]
+        except(KeyError):
+             row["content_type"] = None
+        try:
+            row["last_accessed_date"] = item["content_usage.last_accessed_date"]
+        except:
+            row["last_accessed_date"] = None
+        try:
+           content_type = item["content_usage.content_type"]
+        except KeyError:
+            content_type = None
+        print(row)
+        if content_type == "dashboard":
             try:
                 dashboard = join_content(
                     dashboards, "id", item, "dashboard.id",
@@ -128,7 +152,7 @@ def main():
                 folder_name = None
                 parent_folder_id = None
 
-        elif item["content_usage.content_type"] == "look":
+        elif content_type == "look":
             try:
                 look = join_content(
                     looks, "id", item, "look.id"
