@@ -73,76 +73,77 @@ def parse_broken_content(base_url, broken_content, space_data, content_usage):
     """Parse and return relevant data from content validator"""
     output = []
     for item in broken_content:
-        if item.dashboard:
-            content_type = "dashboard"
-        else:
-            content_type = "look"
-        item_content_type = getattr(item, content_type)
-        id = item_content_type.id
-        name = item_content_type.title
-        space_id = item_content_type.space.id
-        space_name = item_content_type.space.name
-        errors = item.errors
-        url =  f"{base_url}/{content_type}s/{id}"
-        space_url = "{}/spaces/{}".format(base_url,space_id)
-        if content_type == "look":
-                element = None
-        else:
-            dashboard_element = item.dashboard_element
-            element = dashboard_element.title if dashboard_element else None
-        # Lookup additional space information
-        try:
-            space = join_content_sdk(space_data, "id", space_id)
-            parent_space_id = space.parent_id
-        except (StopIteration):
-            parent_space_name = None
-        # Old version of API  has issue with None type for all_space() call
-        if  parent_space_id is None or parent_space_id == "None":
-            parent_space_url = None
-            parent_space_name = None
-        else:
-            parent_space_url = "{}/spaces/{}".format(
-                base_url,
-                parent_space_id
-            )
-            # Handling an edge case where space has no name. This can happen
-            # when users are improperly generated with the API
+        if item is not None:
+            if item.dashboard:
+                content_type = "dashboard"
+            else:
+                content_type = "look"
+            item_content_type = getattr(item, content_type)
+            id = item_content_type.id
+            name = item_content_type.title
+            space_id = item_content_type.space.id
+            space_name = item_content_type.space.name
+            errors = item.errors
+            url =  f"{base_url}/{content_type}s/{id}"
+            space_url = "{}/spaces/{}".format(base_url,space_id)
+            if content_type == "look":
+                    element = None
+            else:
+                dashboard_element = item.dashboard_element
+                element = dashboard_element.title if dashboard_element else None
+            # Lookup additional space information
             try:
-                parent_space = join_content_sdk(space_data, "id", parent_space_id)
-                parent_space_name = parent_space.name
+                space = join_content_sdk(space_data, "id", space_id)
+                parent_space_id = space.parent_id
             except (StopIteration):
                 parent_space_name = None
-        if content_type == "dashboard":
-            try:
-                usage = join_content_dict(content_usage, "dashboard.id", id)
-                last_accessed_date = usage["content_usage.last_accessed_date"]
-            except Exception as e:
-                print(e)
+            # Old version of API  has issue with None type for all_space() call
+            if  parent_space_id is None or parent_space_id == "None":
+                parent_space_url = None
+                parent_space_name = None
+            else:
+                parent_space_url = "{}/spaces/{}".format(
+                    base_url,
+                    parent_space_id
+                )
+                # Handling an edge case where space has no name. This can happen
+                # when users are improperly generated with the API
+                try:
+                    parent_space = join_content_sdk(space_data, "id", parent_space_id)
+                    parent_space_name = parent_space.name
+                except (StopIteration):
+                    parent_space_name = None
+            if content_type == "dashboard":
+                try:
+                    usage = join_content_dict(content_usage, "dashboard.id", id)
+                    last_accessed_date = usage["content_usage.last_accessed_date"]
+                except Exception as e:
+                    print(e)
+                    last_accessed_date = None
+            elif content_type == "look":
+                try:
+                    usage = join_content_dict(content_usage, "look.id", id)
+                    last_accessed_date = usage["content_usage.last_accessed_date"]
+                    is_dashboard_linked_look = ["_dashboard_linked_looks.is_used_on_dashboard"]
+                except Exception as e:
+                    print(e)
+                    last_accessed_date = None
+            else:
                 last_accessed_date = None
-        elif content_type == "look":
-            try:
-                usage = join_content_dict(content_usage, "look.id", id)
-                last_accessed_date = usage["content_usage.last_accessed_date"]
-                is_dashboard_linked_look = ["_dashboard_linked_looks.is_used_on_dashboard"]
-            except Exception as e:
-                print(e)
-                last_accessed_date = None
-        else:
-            last_accessed_date = None
-        data = {
-                "id" : id,
-                "content_type" : content_type,
-                "name" : name,
-                "url" : url,
-                "dashboard_element": element,
-                "space_name" : space_name,
-                "space_url" : space_url,
-                "parent_space_name": parent_space_name,
-                "parent_space_url": parent_space_url,
-                "errors": str(errors),
-                "last_accessed_date": last_accessed_date
-               }
-        output.append(data)
+            data = {
+                    "id" : id,
+                    "content_type" : content_type,
+                    "name" : name,
+                    "url" : url,
+                    "dashboard_element": element,
+                    "space_name" : space_name,
+                    "space_url" : space_url,
+                    "parent_space_name": parent_space_name,
+                    "parent_space_url": parent_space_url,
+                    "errors": str(errors),
+                    "last_accessed_date": last_accessed_date
+                }
+            output.append(data)
     return output
 
 def join_content_dict(match_list, left_key, right_key):
