@@ -5,7 +5,7 @@ import csv
 import json
 from pprint import pprint
 
-config_file = "looker.ini"
+config_file = "looker3.ini"
 sdk = looker_sdk.init31(config_file)
 
 def main():
@@ -21,7 +21,7 @@ def main():
         space_data,
         content_usage
     )
-    print(broken_content)
+  
     print("Done checking for broken content")
     write_broken_content_to_file(broken_content, "broken_content.csv")
 
@@ -46,7 +46,8 @@ def get_content_usage():
         fields=[
             "dashboard.id",
             "look.id",
-            "content_usage.last_accessed_date"
+            "content_usage.last_accessed_date",
+            "_dashboard_linked_looks.is_used_on_dashboard"
         ],
         pivots=None,
         fill_fields=None,
@@ -115,13 +116,16 @@ def parse_broken_content(base_url, broken_content, space_data, content_usage):
             try:
                 usage = join_content_dict(content_usage, "dashboard.id", id)
                 last_accessed_date = usage["content_usage.last_accessed_date"]
-            except:
+            except Exception as e:
+                print(e)
                 last_accessed_date = None
         elif content_type == "look":
             try:
                 usage = join_content_dict(content_usage, "look.id", id)
                 last_accessed_date = usage["content_usage.last_accessed_date"]
-            except:
+                is_dashboard_linked_look = ["_dashboard_linked_looks.is_used_on_dashboard"]
+            except Exception as e:
+                print(e)
                 last_accessed_date = None
         else:
             last_accessed_date = None
