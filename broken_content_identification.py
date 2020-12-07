@@ -4,10 +4,8 @@ import configparser
 import csv
 import json
 from pprint import pprint
-
-config_file = "looker3.ini"
+config_file = "looker.ini"
 sdk = looker_sdk.init31(config_file)
-
 def main():
     base_url = get_base_url()
     space_data = get_space_data()
@@ -21,10 +19,8 @@ def main():
         space_data,
         content_usage
     )
-  
     print("Done checking for broken content")
     write_broken_content_to_file(broken_content, "broken_content.csv")
-
 def get_base_url():
     """ Pull base url from looker.ini, remove port"""
     config = configparser.ConfigParser()
@@ -32,12 +28,10 @@ def get_base_url():
     full_base_url = config.get("Looker", "base_url")
     base_url = sdk.auth.settings.base_url[:full_base_url.index(":19999")]
     return base_url
-
 def get_space_data():
     """Collect all spaces"""
     space_data = sdk.all_spaces(fields="id, parent_id, name")
     return space_data
-
 def get_content_usage():
     """Collect usage stats for all content"""
     query = models.WriteQuery(
@@ -62,23 +56,21 @@ def get_content_usage():
         result_format="json"
     ))
     return unused_content
-
 def get_broken_content():
     """Collect broken content"""
     broken_content  = sdk.content_validation(
         ).content_with_errors   
     return broken_content
-
 def parse_broken_content(base_url, broken_content, space_data, content_usage):
     """Parse and return relevant data from content validator"""
     output = []
     for item in broken_content:
-        if item is not None:
-            if item.dashboard:
-                content_type = "dashboard"
-            else:
-                content_type = "look"
-            item_content_type = getattr(item, content_type)
+        if item.dashboard:
+            content_type = "dashboard"
+        else:
+            content_type = "look"
+        item_content_type = getattr(item, content_type)
+        if item_content_type:
             id = item_content_type.id
             name = item_content_type.title
             space_id = item_content_type.space.id
@@ -145,9 +137,7 @@ def parse_broken_content(base_url, broken_content, space_data, content_usage):
                     "is_dashboard_linked_look": is_dashboard_linked_look
                 }
             output.append(data)
-
     return output
-
 def join_content_dict(match_list, left_key, right_key):
     """ Given a list of dictionaries and a local variable,
     join on a common value """
@@ -155,7 +145,6 @@ def join_content_dict(match_list, left_key, right_key):
         i for i in match_list if str(i[left_key]) == str(right_key)
     )
     return joined_data
-
 def join_content_sdk(match_list, left_key, right_key):
     """ Given a list of sdk objects and a local variable,
     join on a common value """
@@ -163,7 +152,6 @@ def join_content_sdk(match_list, left_key, right_key):
         i for i in match_list if str(getattr(i,left_key)) == str(right_key)
     )
     return joined_data
-
 def write_broken_content_to_file(broken_content, output_csv_name):
     """Export content errors in dev branch to csv file"""
     try:
@@ -180,5 +168,4 @@ def write_broken_content_to_file(broken_content, output_csv_name):
         ))
     except IOError:
         print("I/O error")
-
 main()
