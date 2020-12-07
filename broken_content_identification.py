@@ -145,6 +145,7 @@ def parse_broken_content(base_url, broken_content, space_data, content_usage):
                     "is_dashboard_linked_look": last_accessed_date
                 }
             output.append(data)
+            
     return output
 
 def join_content_dict(match_list, left_key, right_key):
