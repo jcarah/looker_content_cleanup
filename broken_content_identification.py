@@ -141,7 +141,8 @@ def parse_broken_content(base_url, broken_content, space_data, content_usage):
                     "parent_space_name": parent_space_name,
                     "parent_space_url": parent_space_url,
                     "errors": str(errors),
-                    "last_accessed_date": last_accessed_date
+                    "last_accessed_date": last_accessed_date,
+                    "is_dashboard_linked_look": last_accessed_date
                 }
             output.append(data)
     return output
