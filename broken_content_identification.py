@@ -124,7 +124,7 @@ def parse_broken_content(base_url, broken_content, space_data, content_usage):
                 try:
                     usage = join_content_dict(content_usage, "look.id", id)
                     last_accessed_date = usage["content_usage.last_accessed_date"]
-                    is_dashboard_linked_look = ["_dashboard_linked_looks.is_used_on_dashboard"]
+                    is_dashboard_linked_look = usage["_dashboard_linked_looks.is_used_on_dashboard"]
                 except Exception as e:
                     print(e)
                     last_accessed_date = None
