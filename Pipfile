@@ -5,9 +5,12 @@ name = "pypi"
 
 [packages]
 configparser = "==4.0.2"
-looker-sdk = "==0.1.3b15"
+looker-sdk = "==0.1.3b20"
 
 [dev-packages]
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true

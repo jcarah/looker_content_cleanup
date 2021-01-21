@@ -1,8 +1,8 @@
-from looker_sdk import client, models
-from looker_sdk.rtl import transport
+import looker_sdk
+from looker_sdk import models
 
 config_file = "looker.ini"
-sdk = looker_sdk.init31("looker.ini")
+sdk = looker_sdk.init31("sandbox.ini")
 
 
 def soft_delete_dashboard(dashboard_id):
@@ -28,7 +28,10 @@ for look in looks_to_delete:
     soft_delete_look(look)
 
 # Provide a list of dashboard_ids to soft delete
-dashboards_to_delete = []
+dashboards_to_delete = ['732','309','427','477','587','433','610']
 
 for dashboard in dashboards_to_delete:
     soft_delete_dashboard(dashboard)
+
+
+
