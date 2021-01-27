@@ -2,3 +2,4 @@
 *.ini
 *.pyc
 .mypy_cache
+scratch.py
